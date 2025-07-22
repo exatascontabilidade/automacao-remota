@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Disparar Robô</title>
+</head>
+<body>
+  <h1>🚀 Disparar Robô Remotamente</h1>
+  <button onclick="disparar()">Executar Robô</button>
+  <p id="status"></p>
+
+  <script>
+    async function disparar() {
+      const token = "ghp_SEU_TOKEN_AQUI";  // ⚠️ Substitua por variável segura no uso real
+      const repo = "SEU_USUARIO/automacao-remota";
+      const file = "comando.json";
+
+      const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/${file}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const fileData = await getRes.json();
+
+      const novoConteudo = btoa(JSON.stringify({ executar: true }));
+
+      const updateRes = await fetch(`https://api.github.com/repos/${repo}/contents/${file}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message: "🚀 Acionar robô",
+          content: novoConteudo,
+          sha: fileData.sha
+        })
+      });
+
+      if (updateRes.ok) {
+        document.getElementById("status").innerText = "✅ Comando enviado!";
+      } else {
+        document.getElementById("status").innerText = "❌ Erro ao enviar comando.";
+      }
+    }
+  </script>
+</body>
+</html>
