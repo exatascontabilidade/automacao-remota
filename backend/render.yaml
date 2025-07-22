@@ -1,9 +1,0 @@
-services:
-  - type: web
-    name: automacao-backend
-    env: python
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "python app.py"
-    envVars:
-      - key: GITHUB_TOKEN
-        sync: false
