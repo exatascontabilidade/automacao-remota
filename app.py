@@ -1,9 +1,11 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 import requests
 import base64
 import os
 
 app = Flask(__name__)
+CORS(app, origins=["https://automacao-remota.vercel.app"])  # ✅ permite requisições da Vercel
 
 # Token será definido como variável de ambiente no Render
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
@@ -48,6 +50,5 @@ def home():
     return jsonify(message="API de automação ativa. Use POST /executar"), 200
 
 if __name__ == "__main__":
-    import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
