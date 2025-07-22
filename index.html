@@ -11,34 +11,52 @@
 
   <script>
     async function disparar() {
-      const token = "ghp_SEU_TOKEN_AQUI";  // ⚠️ Substitua por variável segura no uso real
-      const repo = "SEU_USUARIO/automacao-remota";
+      const token = "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";  // ⚠️ visível no frontend, não usar em produção
+      const repo = "exatascontabilidade/automacao-remota";
       const file = "comando.json";
+      const url = `https://api.github.com/repos/${repo}/contents/${file}`;
 
-      const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/${file}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const fileData = await getRes.json();
+      try {
+        // Passo 1 – Obter SHA atual
+        const getRes = await fetch(url, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
 
-      const novoConteudo = btoa(JSON.stringify({ executar: true }));
+        if (!getRes.ok) {
+          document.getElementById("status").innerText = "❌ Erro ao buscar SHA.";
+          console.error("Erro ao obter SHA:", await getRes.text());
+          return;
+        }
 
-      const updateRes = await fetch(`https://api.github.com/repos/${repo}/contents/${file}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          message: "🚀 Acionar robô",
-          content: novoConteudo,
-          sha: fileData.sha
-        })
-      });
+        const fileData = await getRes.json();
+        const sha = fileData.sha;
 
-      if (updateRes.ok) {
-        document.getElementById("status").innerText = "✅ Comando enviado!";
-      } else {
-        document.getElementById("status").innerText = "❌ Erro ao enviar comando.";
+        // Passo 2 – Gerar novo conteúdo em base64
+        const novoConteudo = btoa(JSON.stringify({ executar: true }));
+
+        // Passo 3 – Atualizar o comando.json
+        const updateRes = await fetch(url, {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            message: "🚀 Atualizar comando.json para executar",
+            content: novoConteudo,
+            sha: sha
+          })
+        });
+
+        if (updateRes.ok) {
+          document.getElementById("status").innerText = "✅ Comando enviado!";
+        } else {
+          document.getElementById("status").innerText = "❌ Erro ao enviar comando.";
+          console.error("Erro ao atualizar comando:", await updateRes.text());
+        }
+      } catch (error) {
+        document.getElementById("status").innerText = "❌ Erro inesperado.";
+        console.error("Erro geral:", error);
       }
     }
   </script>
