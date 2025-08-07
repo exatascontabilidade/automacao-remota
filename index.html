@@ -11,13 +11,26 @@
 
   <script>
     async function disparar() {
+      // O endpoint correto, conforme a mensagem da sua API, é com /executar
       const endpoint = "https://automacao-remota.onrender.com/executar";
       const statusEl = document.getElementById("status");
 
+      // Dados que serão enviados para a API
+      const dados = {
+        serviceId: "srv-d1vs5rbipnbc73fa8jqg"
+      };
+
       try {
         statusEl.innerText = "⏳ Disparando robô...";
+        
         const res = await fetch(endpoint, {
-          method: "POST"
+          method: "POST",
+          // Adiciona o cabeçalho para indicar que estamos enviando JSON
+          headers: {
+            "Content-Type": "application/json"
+          },
+          // Converte o objeto JavaScript em uma string JSON e envia no corpo da requisição
+          body: JSON.stringify(dados)
         });
 
         const data = await res.json();
@@ -25,11 +38,12 @@
         if (data.success) {
           statusEl.innerText = "✅ Robô executado com sucesso!";
         } else {
-          statusEl.innerText = "❌ Falha ao executar robô.";
-          console.error("Erro:", data.error);
+          // Usa a mensagem de erro da API, se disponível
+          statusEl.innerText = `❌ Falha ao executar robô: ${data.error || 'Erro desconhecido.'}`;
+          console.error("Erro da API:", data.error);
         }
       } catch (error) {
-        statusEl.innerText = "❌ Erro inesperado.";
+        statusEl.innerText = "❌ Erro inesperado na comunicação.";
         console.error("Erro geral:", error);
       }
     }
